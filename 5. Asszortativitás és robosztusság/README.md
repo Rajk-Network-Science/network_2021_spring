@@ -1,4 +1,4 @@
-### 6. házi
+### 5. házi
 
 Kötelező olvasmányok:
 - [NetworkScience Book Ch 7: Degree Correlations](http://networksciencebook.com/chapter/7)

@@ -1,4 +1,4 @@
-### 5. házi
+### 4. házi
 
 Kötelező olvasmány:
 - [Inferring User Demographics and Social Strategies in Mobile Social Networks](https://ericdongyx.github.io/papers/KDD14-Dong-et-al-WhoAmI-demographic-prediction.pdf)

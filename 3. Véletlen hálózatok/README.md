@@ -1,4 +1,4 @@
-### 4. házi
+### 3. házi
 
 Kötelező olvasmányok:
 - [NetworkScience Book Ch 3: Random Networks](http://networksciencebook.com/chapter/3)

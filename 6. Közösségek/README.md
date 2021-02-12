@@ -1,4 +1,4 @@
-### 7. házi
+### 6. házi
 
 Kötelező olvasmányok:
 - [NetworkScience Book Ch 9: Communities](http://networksciencebook.com/chapter/9)
