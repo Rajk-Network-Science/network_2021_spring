@@ -22,7 +22,7 @@ A >link< helyére írjátok be, ami a saját fork-olt github repo-tokban megjele
 ![clone](https://github.com/Rajk-Network-Science/network_2021_spring/blob/main/GitHub/github_clone.png)
 
 ## 4. Commit és pull request
-Miután klónoltátok a mappát a gépetekre, másoljátok az adott feladatot (vagy csináljatok egy új notebookot) a **HÁZIK** mappán belül a saját nevetekkel ellátott mappába, és itt dolgozzatok. Miután kész vagytok az aktuális heti dolgokkal, megint nyissátok meg a paracssort, lépjetek be a kurzus mappájába, és a következő három paranccsal rögzítsétek a git rendszerében a módosításaitok, illetve töltsétek fel őket a GitHub-ra:
+Miután klónoltátok a mappát a gépetekre, másoljátok az adott feladatot (vagy csináljatok egy új notebookot) a **HAZIK** mappán belül a saját nevetekkel ellátott mappába, és itt dolgozzatok. Miután kész vagytok az aktuális heti dolgokkal, megint nyissátok meg a paracssort, lépjetek be a kurzus mappájába, és a következő három paranccsal rögzítsétek a git rendszerében a módosításaitok, illetve töltsétek fel őket a GitHub-ra:
 - ```git add .``` (ezt csak abban az esetben, ha minden változtatást commit-olni akartok, ellenkező esetben a . helyére az egyes mappák, fájlok neveit kell írni, elérési úttal együtt)
 - ```git commit -m "valami üzenet"```
 - ```git push```
