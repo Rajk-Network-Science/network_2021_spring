@@ -1,0 +1,1 @@
+Ide tölthetitek fel az összes házit, a nevetekkel ellátott mappába.
