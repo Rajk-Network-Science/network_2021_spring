@@ -3,6 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import powerlaw as powerlaw
+import random
 
 def suruseg_ertekelo(eloszl1, eloszl2):
     '''
@@ -25,3 +26,12 @@ def norm_konst(eloszl):
     '''
     values, bins, _ = plt.hist(eloszl)
     return sum(np.diff(bins)*values)
+    
+    
+#def normal_hasonlito(eloszl, n):
+    '''
+    egy megadott eloszlásból vesz n darab véletlen értéket,
+    kiszámolja standardizálva a hisztogramot
+    és a standard normális eloszlással összehasonlítva kiszámolja a kettő hisztogram közötti legnagyobb abszolút eltérést
+    '''
+
