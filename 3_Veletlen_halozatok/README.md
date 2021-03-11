@@ -9,16 +9,19 @@ Kötelező olvasmányok:
 
 Aminek mindenképpen szerepelnie kell benne:
 - Fokszámeloszlás
-- Átlagos Fokszám
+- Átlagos fokszám
 - Átmérő
 - Átlagos legrövidebb út
-
-Példahálózatokat innen gyűjthettek: https://snap.stanford.edu/data/index.html
-Azt javaslom kis hálózatot válasszatok, különben behal a gépetek. Javaslom hogy ezt a Barabási könyv elolvasása után tegyétek.
 
 Az ábrákhoz tartozik:
 - Cím
 - Tengelyfeliratok
 - Egy rövid magyarázat
 
-A végeredmény egy rövid word doksi legyen, ahol lehivatkozzátok az adatforrást, röviden bemutatjátok hogy mi is a hálózat, majd prezentáljátok az eredményeket néhány mondatos értelmezéssel.
+Javaslatok:
+- Példahálózatokat innen gyűjthettek: https://snap.stanford.edu/data/index.html
+- Kis hálózatot válasszatok, különben behal a gépetek
+- A Barabási könyv elolvasása után kezdjetek neki a házinak
+- Használjátok a Python [NetworkX](https://networkx.org/documentation/stable/) nevű csomagját
+
+A végeredmény egy `.py` fájl legyen, és egy notebook, amiben megnézhetem az eredményeket. Illetve markdownban írhattok bármit, ami az elemzéshez tartozik (ábrák értelmezése, stb.), ez rátok van bízva.
