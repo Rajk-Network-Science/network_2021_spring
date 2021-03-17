@@ -19,13 +19,16 @@ import numpy as np
 def generate_hazi3():
         g = nx.read_edgelist("CA-GrQc.txt",create_using=nx.DiGraph(), nodetype = int)
 
-        print('Csomópontok száma:', g.number_of_nodes())
+        print('Csúcsok száma:', g.number_of_nodes())
         print('Klaszterezettségi együttható:', nx.average_clustering(g))
         degrees = [len(list(g.neighbors(n))) for n in g.nodes()]
         print('Átlagos fokszám:', sum(degrees)/len(degrees))
-        if nx.is_connected(nx.to_undirected(g)) == False:
+        if nx.is_connected(nx.to_undirected(g)):
+            print('Átmérő:', nx.algorithms.distance_measures.diameter(g)
+            print('Átlagos legrövidebb út:', nx.average_shortest_path_length(g))
+        else:
             print('A gráf nem kapcsolódik össze teljesen, vannak izolált pontok, vagyis több komponensből áll. Ezért végtelen az átmérője és nem talál átlagos legrövidebb utat.')
-        
+                
         fig, ax = plt.subplots()
         
         #mu = sum(degrees)/len(degrees)
