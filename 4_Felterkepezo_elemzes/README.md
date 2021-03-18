@@ -39,6 +39,5 @@ Lineáris regresszió pythonban: https://scikit-learn.org/stable/modules/generat
 
 Arra is figyeljetek, hogy az elején még nem érvényesül a hatványszabály, ami torzítja a meredekséget. Próbáljátok meg tényleg csak a lineáris részéhez behúzni, annak a meredeksége a fontos.
 
-Csináljatok meg 2 LynxKite tutorialt a [demo.lynxkite.com](demo.lynxkite.com) - on, és nyomjatok egy screenshotot a workspaceről. 
 
 Hajrá, jövő héten Skypeolunk!
