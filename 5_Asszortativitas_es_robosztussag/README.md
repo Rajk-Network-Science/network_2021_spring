@@ -18,8 +18,6 @@ Elvárt teljesítési szint: Model fit, nem kell kitörölni a gendert, elég eg
 
 Az elemzéseteket támasszátok alá leíró statisztikákkal és ábrákkal. Nem egy lineáris regressziót kérek csak, hanem egy elemzést, arról, hogy miképpen működik a Gender ebben a hálózatban az életkorral összefüggésben. Az ábrák legyenek szépek!
 
-A notebookot mindenképpen le kell adni. 2 opciótok van: vagy leadtok egy szépen letisztázott, Markdownos szöveggel teletűzdelt jupyter notebookot, vagy kimásoljátok az ábrákat Wordbe és úgy írtok hozzá szöveget.
-
 Hajrá, ez most egy neház, komplex feladat, javaslom hogy párosodjatok!
 
 [Erről a linkről](https://snap.stanford.edu/data/soc-Pokec.html) tudjátok leszedni az adatot.
