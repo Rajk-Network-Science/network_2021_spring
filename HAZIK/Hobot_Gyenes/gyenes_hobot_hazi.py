@@ -4,82 +4,22 @@ import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import re
+import community
 
-header = [
-    "user_id",
-    "public",
-    "completion_percentage",
-    "gender",
-    "region",
-    "last_login",
-    "registration",
-    "AGE",
-    "body",
-    "I_am_working_in_field",
-    "spoken_languages",
-    "hobbies",
-    "I_most_enjoy_good_food",
-    "pets",
-    "body_type",
-    "my_eyesight",
-    "eye_color",
-    "hair_color",
-    "hair_type",
-    "completed_level_of_education",
-    "favourite_color",
-    "relation_to_smoking",
-    "relation_to_alcohol",
-    "sign_in_zodiac",
-    "on_pokec_i_am_looking_for",
-    "love_is_for_me",
-    "relation_to_casual_sex",
-    "my_partner_should_be",
-    "marital_status",
-    "children",
-    "relation_to_children",
-    "I_like_movies",
-    "I_like_watching_movie",
-    "I_like_music",
-    "I_mostly_like_listening_to_music",
-    "the_idea_of_good_evening",
-    "I_like_specialties_from_kitchen",
-    "fun",
-    "I_am_going_to_concerts",
-    "my_active_sports",
-    "my_passive_sports",
-    "profession",
-    "I_like_books",
-    "life_style",
-    "music",
-    "cars",
-    "politics",
-    "relationships",
-    "art_culture",
-    "hobbies_interests",
-    "science_technologies",
-    "computers_internet",
-    "education",
-    "sport",
-    "movies",
-    "travelling",
-    "health",
-    "companies_brands",
-    "more",
-    "more"
-]
+header = ["user_id", "gender", "region", "AGE"]
 
-def megnyit(filename):
-    df = pd.read_csv(filename, compression='gzip', header=None, sep='\t', quotechar='"')
-    return df
 
 def minta(df_node, df_attr):
     
     #kell neki adni headert
+
+    header = ["user_id", "gender", "region", "AGE"]
     df_attr.columns=header
     df_node.columns=["node_1", "node_2"]
     
-    #dobjuk ki a szart a picsába
-    df_attr=df_attr[df_attr.region=="bratislavsky kraj, bratislava - nove mesto"]
+    #egy pár régiót választunk, ez a minta lényege
+    
+    df_attr=df_attr[(df_attr.region=="bratislavsky kraj, bratislava - nove mesto") | (df_attr.region=='bratislavsky kraj, bratislava - karlova ves') | (df_attr.region=='bratislavsky kraj, bratislava - ruzinov')]
     
     #itt lesz pár merge
     na=df_attr.merge(df_node, left_on="user_id", right_on="node_1", how="inner")
@@ -91,45 +31,101 @@ def minta(df_node, df_attr):
     nana.drop_duplicates()
     nana=nana[["node_1", "node_2", "gender_y", "gender_x", "AGE"]]
     nana.columns=["node_1", "node_2", "gender_1", "gender_2", "age_1"]
+    nana=nana.merge(df_attr, how="left", right_on="user_id", left_on="node_2")
+    nana=nana[["node_1", "node_2", "gender_1", "gender_2", "age_1", "AGE"]]
+    nana.columns=["node_1", "node_2", "gender_1", "gender_2", "age_1", "age_2"]
+    nana=nana.drop_duplicates()
+
+
+
     
     return nana
 
+
+
+
+
+def generate_attribute_data(data, G):
+    da1=pd.DataFrame(G.nodes.data("gender_1"), columns=['Node',"Gender"])
+    da2=pd.DataFrame(G.nodes.data("age_1"), columns=['Node',"Age"])
+    da3=pd.DataFrame(G.degree(), columns=['Node',"Degree"])
+    da4=pd.Series(nx.average_neighbor_degree(G)).to_frame().reset_index()
+    da4.columns = ['Node',"Avg_Neighbor_Degree"]
+    da5=pd.Series(nx.clustering(G)).to_frame().reset_index()
+    da5.columns = ['Node',"Clustering_Coeff"]
+    da6=pd.Series(nx.triangles(G)).to_frame().reset_index()
+    da6.columns = ['Node',"Num_Triangles"]
+    data=pd.merge(data, da1, how="inner", on="Node")
+    data=pd.merge(data, da2, how="inner", on="Node")
+    data=pd.merge(data, da3, how="inner", on="Node")
+    data=pd.merge(data, da4, how="inner", on="Node")
+    data=pd.merge(data, da5, how="inner", on="Node")
+    data=pd.merge(data, da6, how="inner", on="Node")
+    
+    return data
+
+def make_community(G):
+    #a függvény lényege, hogy feltérképezzük a legközelebb álló "klasztereket" Louvain metódussal
+    bestcomm_dict = community.best_partition(G)
+    maxQ_L = community.modularity(bestcomm_dict,G)
+    print("Klaszterek száma:", max(bestcomm_dict.values())+1, "Louvain modularitás: %.3f"%maxQ_L)
+    
+    return bestcomm_dict
+
+def add_community(G, bestcomm_dict, data):
+    # a függvény célja, hogy hozzáadjuk a gráf attributumokat tároló dataframehez a nodeokhoz tartozó communitiket
+    commune=[]
+    nodes=[]
+    for node in G.nodes():
+        commune.append(bestcomm_dict[node])
+        nodes.append(node)
+    communities=pd.DataFrame()
+    communities["nodes"]=nodes
+    communities["Community"]=commune
+    data=data.merge(communities, how="left", left_on="Node", right_on="nodes")
+    data.drop(["nodes"], axis=1)
+    
+    return data
     
     
 def mean_predict(df):
+    # a függvény lényege, hogy a szomszédok nemének móduszát adja az egyes node-ok prediktált nemére
     pred=df.groupby("node_1")[["gender_1","gender_2" ]].mean().reset_index()
     pred["predict"]=pred["gender_2"].apply(lambda half: 1 if half<0.5 else 0)
     
     return pred
 
+def community_pred(data):
+    com_pred=data.groupby(["Community"])["Gender"].mean().reset_index()
+    com_pred.columns=["Community", "gender_com_pred"]
+    com_pred=data.merge(com_pred, how="left", left_on="Community", right_on="Community")
+    com_pred.gender_com_pred=com_pred.gender_com_pred.apply(lambda half: 1 if half<0.5 else 0)
+    com_pred=com_pred[com_pred["Gender"].notna()]
+
+    return com_pred
+
+def triplet_pred(data):
+    trip_pred=data
+    trip_pred["Gender_pred"]=np.where(trip_pred["FF"]>trip_pred["LL"], 1, 0)
+    trip_pred=trip_pred[trip_pred["Gender"].notna()]
+    
+    return trip_pred
 
 
+def data_target(data):
+    pred_data=data[data["Gender"].notna()].reset_index()
+    pred_data=pred_data.drop("Gender", axis=1)
+    target=data[data["Gender"].notna()].reset_index()
+    target=target["Gender"]
+    return pred_data, target
 
-def k_distrib(graph, fit_line=False, expct_lo=1, expct_hi=10, expct_const=1):
-    plt.close()
-    num_nodes = graph.number_of_nodes()
-    max_degree = 0
-    # Megkeressük a legmagasabb fokszámot, ami alapján meghatározzuk az x-tengelyt
-    for n in graph.nodes():
-        if graph.degree(n) > max_degree:
-            max_degree = graph.degree(n)
-    # X és Y tengely értékei
-    x = []
-    y_tmp = []
-    # Végigiterálok a legnagyobb fokszám terjedelmében és meghatározom az adott fokszámok arányait a csomópontok alapján
-    for i in range(max_degree + 1):
-        x.append(i)
-        y_tmp.append(0)
-        for n in graph.nodes():
-            if graph.degree(n) == i:
-                y_tmp[i] += 1
-        y = [i / num_nodes for i in y_tmp] 
-    plt.xscale('log')
-    plt.yscale('log')
-    plt.title('Degree Distribution (log-log scale)')
-    plt.ylabel('log(P(k))')
-    plt.xlabel('log(k)')
-    plt.plot(x, y, linewidth = 0, marker = 'o', markersize = 4, color = 'purple', alpha = 1)
+
+def plot_degree_dist(G, fit_line=False, expct_lo=1, expct_hi=10, expct_const=1):
+    degree_hist = nx.degree_histogram(G) 
+    degree_hist = np.array(degree_hist, dtype=float)
+    degree_prob = degree_hist/G.number_of_nodes()
+    plt.figure(figsize=(12, 8))
+    plt.loglog(np.arange(degree_prob.shape[0]),degree_prob,linewidth = 0, marker = 'o', markersize = 4, color = 'purple', alpha = 1)
     if fit_line:
         w = [a for a in range(expct_lo,expct_hi)]
         z = []
@@ -137,176 +133,135 @@ def k_distrib(graph, fit_line=False, expct_lo=1, expct_hi=10, expct_const=1):
             x = (i**-3) * expct_const # Elméleti egyenes -3 meredekséggel és tetszőleges konstanssal
             z.append(x)
         plt.plot(w, z, 'k-', color='black')
+    plt.xlabel('k')
+    plt.ylabel('p(k)')
+    plt.title('Degree Distribution')
     plt.show()
     
     
-    
-def age_degree(G):
-    plt.close()
-    
-    # X és Y tengely értékei
-    kor=[]
-    for i in G.nodes.data("age_1"):
-        kor.append(i[1])
-    
-    x=set(kor)
-    x=list(x)
-    if None in x:
-        x.remove(None)
-    y1 = []
-    y2 = []
-    
-    # Végigiterálok a kor terjedelmében és meghatározom az adott fokszámok arányait a csomópontok alapján
-    for i in x:
-        y_tmp1=[]
-        y_tmp2=[]
-        for n in G.nodes():
-            if G.nodes.data("age_1")[n]==i:
-                if G.nodes.data("gender_1")[n]==1:
-                    y_tmp1.append(G.degree[n])
-                elif G.nodes.data("gender_1")[n]==0:
-                    y_tmp2.append(G.degree[n])
-                else:
-                    pass
+def triplets(data, G):
+    triok=[]
+    for n in G.nodes():
+        dara=nx.to_pandas_edgelist(nx.ego_graph(G, n, radius=1, center=False))
+        dara=dara.merge(data, how="left", left_on="target", right_on="Node")
+        dara=dara.merge(data, how="left", left_on="source", right_on="Node")
+        dara=dara[["Gender_x","Gender_y"]]
+        dara=dara[dara['Gender_x'].notna()]
+        dara=dara[dara['Gender_y'].notna()]
+        dara=dara.reset_index()
+        ff=0
+        ll=0
+        fl=0
+        for i in range(len(dara)):
+            if dara.loc[i][1]==0 and dara.loc[i][2]==0:
+                ll+=1
+            elif dara.loc[i][1]==1 and dara.loc[i][2]==1:
+                ff+=1
             else:
-                pass
-        if len(y_tmp1)>0:
-            y1.append(np.nanmean(y_tmp1))
-        else:
-            y1.append(0)
-        if len(y_tmp2):
-            y2.append(np.nanmean(y_tmp2))
-        else:
-            y2.append(0)
+                fl+=1
+        szum=ff+ll+fl
+        if ff>0:
+            ff=ff/szum
+        if ll>0:
+            ll=ll/szum
+        if fl>0:
+            fl=fl/szum
+        lista=[n,ff,ll,fl]
+        triok.append(lista)
+
+    triok=pd.DataFrame(triok, columns=['Node',"FF","LL","FL"])
+    data=pd.merge(data, triok, how="inner", on="Node")
+
+    return data
+
+
+
     
-    x = np.array(x)
-    y1 = np.array(y1)
-    y2 = np.array(y2)
-    y=[]
-    y.append(np.nanmax(y1))
-    y.append(np.nanmax(y2))
-    y.append(np.nanmin(y1))
-    y.append(np.nanmin(y2))
-    
+def age_degree(data):
+    dara = data.pivot_table(index='Age', columns='Gender', values='Degree', aggfunc=np.nanmean).reset_index()
+    dara.columns = ["Age","Women", "Men"]
+    daka = data.pivot_table(index='Age', columns='Gender', values='Degree', aggfunc=np.nanstd).reset_index()
+    daka.columns = ["Age","Women_error", "Men_error"]
+    dara=pd.merge(dara, daka, how="inner", on="Age")
+    Age=dara["Age"]
+    Women=dara["Women"]
+    Men=dara["Men"]
+    Women_error=dara["Women_error"]
+    Men_error=dara["Men_error"]
+    plt.figure(figsize=(12, 8))
     plt.rc('font', family='serif', size=13)
-    plt.plot(x,y1, linewidth = 1, marker = 'o', markersize = 4,label="Male", color='#0066FF')
-    plt.plot(x,y2, linewidth = 1, marker = 'o', markersize = 4,label="Female", color='red')
+    
+    plt.plot(Age, Men, 'k', color='blue', label="Male")
+    plt.fill_between(Age, Men-Men_error/Men, Men+Men_error/Men,
+        alpha=0.5, edgecolor='#CC4F1B', facecolor='#089FFF')
+    
+    plt.plot(Age, Women, 'k', color='red', label="Female")
+    plt.fill_between(Age, Women-Women_error/Women, Women+Women_error/Women,
+        alpha=0.5, edgecolor='#CC4F1B', facecolor='#FF9848')
+    
+    plt.legend(loc='upper right')
     plt.xlabel('Age',fontsize=15)
     plt.ylabel('Average Degree',fontsize=15)
     plt.title("Degree Centrality")
     plt.xlim(13,40)
-    plt.ylim(np.min(y),np.max(y))
-    plt.legend(loc='lower left')
-    plt.show()   
-    
 
     
-def age_connect(G):
-    plt.close()
-    # X és Y tengely értékei
-    kor=[]
-    for i in G.nodes.data("age_1"):
-        kor.append(i[1])
-    x=set(kor)
-    x=list(x)
-    if None in x:
-        x.remove(None)
-    y1 = []
-    y2 = []
-    # Végigiterálok a kor terjedelmében és meghatározom az adott fokszámok arányait a csomópontok alapján
-    for i in x:
-        y_tmp1=[]
-        y_tmp2=[]
-        for n in G.nodes():
-            if G.nodes.data("age_1")[n]==i:
-                if G.nodes.data("gender_1")[n]==1:
-                    y_tmp1.append(nx.average_neighbor_degree(G)[n])
-                elif G.nodes.data("gender_1")[n]==0:
-                    y_tmp2.append(nx.average_neighbor_degree(G)[n])
-                else:
-                    pass
-            else:
-                pass
-        if len(y_tmp1)>0:
-            y1.append(np.nanmean(y_tmp1))
-        else:
-            y1.append(0)
-        if len(y_tmp2):
-            y2.append(np.nanmean(y_tmp2))
-        else:
-            y2.append(0)
-    x = np.array(x)
-    y1 = np.array(y1)
-    y2 = np.array(y2)
-    y=[]
-    y.append(np.nanmax(y1))
-    y.append(np.nanmax(y2))
-    y.append(np.nanmin(y1))
-    y.append(np.nanmin(y2))
+def age_connect(data):
+    dara = data.pivot_table(index='Age', columns='Gender', values='Avg_Neighbor_Degree', aggfunc=np.nanmean).reset_index()
+    dara.columns = ["Age","Women", "Men"]
+    daka = data.pivot_table(index='Age', columns='Gender', values='Avg_Neighbor_Degree', aggfunc=np.nanstd).reset_index()
+    daka.columns = ["Age","Women_error", "Men_error"]
+    dara=pd.merge(dara, daka, how="inner", on="Age")
+    Age=dara["Age"]
+    Women=dara["Women"]
+    Men=dara["Men"]
+    Women_error=dara["Women_error"]
+    Men_error=dara["Men_error"]
+    plt.figure(figsize=(12, 8))
     plt.rc('font', family='serif', size=13)
-    plt.plot(x,y1, linewidth = 1, marker = 'o', markersize = 4,label="Male", color='#0066FF')
-    plt.plot(x,y2, linewidth = 1, marker = 'o', markersize = 4,label="Female", color='red')
+    
+    plt.plot(Age, Men, 'k', color='blue', label="Male")
+    plt.fill_between(Age, Men-Men_error/Men, Men+Men_error/Men,
+        alpha=0.5, edgecolor='#CC4F1B', facecolor='#089FFF')
+    
+    plt.plot(Age, Women, 'k', color='red', label="Female")
+    plt.fill_between(Age, Women-Women_error/Women, Women+Women_error/Women,
+        alpha=0.5, edgecolor='#CC4F1B', facecolor='#FF9848')
+    
+    plt.legend(loc='upper right')
     plt.xlabel('Age',fontsize=15)
     plt.ylabel('Average Neighbor Degree',fontsize=15)
     plt.title("Neighbor Connectivity")
     plt.xlim(13,40)
-    plt.ylim(np.min(y),np.max(y))
-    plt.legend(loc='lower left')
-    plt.show()      
     
-def age_clustering(G):
-    plt.close()
-    # X és Y tengely értékei
-    kor=[]
-    for i in G.nodes.data("age_1"):
-        kor.append(i[1])
-    x=set(kor)
-    x=list(x)
-    if None in x:
-        x.remove(None)
-    y1 = []
-    y2 = []
-    # Végigiterálok a kor terjedelmében és meghatározom az adott fokszámok arányait a csomópontok alapján
-    for i in x:
-        y_tmp1=[]
-        y_tmp2=[]
-        for n in G.nodes():
-            if G.nodes.data("age_1")[n]==i:
-                if G.nodes.data("gender_1")[n]==1:
-                    y_tmp1.append(nx.clustering(G)[n])
-                elif G.nodes.data("gender_1")[n]==0:
-                    y_tmp2.append(nx.clustering(G)[n])
-                else:
-                    pass
-            else:
-                pass
-        if len(y_tmp1)>0:
-            y1.append(np.nanmean(y_tmp1))
-        else:
-            y1.append(0)
-        if len(y_tmp2):
-            y2.append(np.nanmean(y_tmp2))
-        else:
-            y2.append(0)
-    x = np.array(x)
-    y1 = np.array(y1)
-    y2 = np.array(y2)
-    y=[]
-    y.append(np.nanmax(y1))
-    y.append(np.nanmax(y2))
-    y.append(np.nanmin(y1))
-    y.append(np.nanmin(y2))
+    
+def age_clustering(data):
+    dara = data.pivot_table(index='Age', columns='Gender', values='Clustering_Coeff', aggfunc=np.nanmean).reset_index()
+    dara.columns = ["Age","Women", "Men"]
+    daka = data.pivot_table(index='Age', columns='Gender', values='Clustering_Coeff', aggfunc=np.nanstd).reset_index()
+    daka.columns = ["Age","Women_error", "Men_error"]
+    dara=pd.merge(dara, daka, how="inner", on="Age")
+    Age=dara["Age"]
+    Women=dara["Women"]
+    Men=dara["Men"]
+    Women_error=dara["Women_error"]
+    Men_error=dara["Men_error"]
+    plt.figure(figsize=(12, 8))
     plt.rc('font', family='serif', size=13)
-    plt.plot(x,y1, linewidth = 1, marker = 'o', markersize = 4,label="Male", color='#0066FF')
-    plt.plot(x,y2, linewidth = 1, marker = 'o', markersize = 4,label="Female", color='red')
+    
+    plt.plot(Age, Men, 'k', color='blue', label="Male")
+    plt.fill_between(Age, Men-Men_error/Men, Men+Men_error/Men,
+        alpha=0.5, edgecolor='#CC4F1B', facecolor='#089FFF')
+    
+    plt.plot(Age, Women, 'k', color='red', label="Female")
+    plt.fill_between(Age, Women-Women_error/Women, Women+Women_error/Women,
+        alpha=0.5, edgecolor='#CC4F1B', facecolor='#FF9848')
+    
+    plt.legend(loc='upper right')
     plt.xlabel('Age',fontsize=15)
     plt.ylabel('Local clustering coefficient',fontsize=15)
     plt.title("Triadic Closure")
-    plt.xlim(13,40)
-    plt.ylim(np.min(y),np.max(y))
-    plt.legend(loc='lower left')
-    plt.show()
-    
+    plt.xlim(13,50)
     
     
     
@@ -316,7 +271,7 @@ def log_predict_data_target(df_attr):
     interesting=df_attr[interesting]
     import warnings
     warnings.filterwarnings("ignore")
-    #csináélok szlovák dolgokat
+    #csinálok szlovák dolgokat
     interesting["sex"]=np.where(interesting.hobbies.str.contains("sex"), 1, 0)
     interesting["kino"]=np.where(interesting.hobbies.str.contains("kino"), 1, 0)
     interesting["spanie"]=np.where(interesting.hobbies.str.contains("spanie"), 1, 0)
@@ -357,6 +312,36 @@ def log_predict_data_target(df_attr):
     data["weight"]=data["weight"].apply(lambda weight: int(weight))
     
     return data,target
+
+
+def boys_and_girls(df):
+    cross_age=df[(df["age_1"]>15) & (df["age_2"]>15) & (df["age_2"]<35) & (df["age_1"]<35)]
+    cross_age["age_1"]=cross_age['age_1'].fillna(0)
+    cross_age["age_2"]=cross_age['age_2'].fillna(0)
+    cross_age=cross_age.groupby(["age_1", "age_2"])["node_1"].count().unstack()
+    cross_age=cross_age.fillna(0)
+
+    cross_age_boys=df[(df["age_1"]>15) & (df["age_2"]>15) & (df["age_2"]<35) & (df["age_1"]<35) & (df["gender_1"]==1) & (df["gender_2"]==1)]
+    cross_age_boys["age_1"]=cross_age_boys['age_1'].fillna(0)
+    cross_age_boys["age_2"]=cross_age_boys['age_2'].fillna(0)
+    cross_age_boys=cross_age_boys.groupby(["age_1", "age_2"])["node_1"].count().unstack()
+    cross_age_boys=cross_age_boys.fillna(0)
+
+    cross_age_girls=df[(df["age_1"]>15) & (df["age_2"]>15) & (df["age_2"]<35) & (df["age_1"]<35) & (df["gender_1"]==0) & (df["gender_2"]==0)]
+    cross_age_girls["age_1"]=cross_age_girls['age_1'].fillna(0)
+    cross_age_girls["age_2"]=cross_age_girls['age_2'].fillna(0)
+    cross_age_girls=cross_age_girls.groupby(["age_1", "age_2"])["node_1"].count().unstack()
+    cross_age_girls=cross_age_girls.fillna(0)
+
+    cross_age_girls_boys=df[(df["age_1"]>15) & (df["age_2"]>15) & (df["age_2"]<35) & (df["age_1"]<35) & (df["gender_1"]==1) & (df["gender_2"]==0)]
+    cross_age_girls_boys["age_1"]=cross_age_girls_boys['age_1'].fillna(0)
+    cross_age_girls_boys["age_2"]=cross_age_girls_boys['age_2'].fillna(0)
+    cross_age_girls_boys=cross_age_girls_boys.groupby(["age_1", "age_2"])["node_1"].count().unstack()
+    cross_age_girls_boys=cross_age_girls_boys.fillna(0)
+
+    return cross_age, cross_age_boys, cross_age_girls, cross_age_girls_boys
+
+
     
     
     
