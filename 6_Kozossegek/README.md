@@ -19,8 +19,3 @@ Ami mindenképpen kell:
 - Elemző szövegek az ábrákhoz, és ha van modell akkor ahhoz. Szép legyen, formázott. Ha megy akkor markdownban, ha nem akkor wordben.
 
 Hajrá!
-
-**2. feladat: beszámoló vázlat**
-
-Aminek mindenképpen szerepelni kell: adat, hipotézis, módszertan.
-1 oldal elég, a lényeg hogy gondolkozzatok rajta, és legyen valami előzetes elképzelésetek!
