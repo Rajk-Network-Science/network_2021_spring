@@ -7,7 +7,7 @@ Kötelező olvasmányok:
 Opcionális olvasmány:
 - [The Strength of Weak Ties](https://drive.google.com/open?id=1gNUMWlhr_OTf4Cj05kiZbAT3fS0Fhvo5&authuser=0): Opcionális cikk, cserébe nagyon érdekes, és rengeteget lehet épülni belőle ha elolvassa az ember. Ez a kötelező cikk elméleti háttere, nem mellesleg 11k hivatkozással a Milgram mellett a másik ős-cikk. 
 
-**1. feladat: előző házi rewamp**
+**Feladat: előző házi rewamp**
 
 Az emailben kapott kommentek alapján kérlek tisztázzátok le a házitokat. 
 
