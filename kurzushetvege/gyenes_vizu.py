@@ -72,7 +72,7 @@ def graf_vizu(edge_features,node_features, logarithm=True, node_size_multiplier 
             mig_net.add_edge(r["origin"], r["destination"], width=r["migration"])
     return mig_net
 
-def barchart(state, stock=True, origin=True):
+def barchart_migracio(state, node_features, edge_features, stock=True, origin=True):
     node,edge=generate_data(node_features,edge_features)
     if stock:
         if origin:
