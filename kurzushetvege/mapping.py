@@ -1,12 +1,12 @@
 import plotly.graph_objects as go
 import pandas as pd
 
-def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000, edgeweight_multiplier = 0.02):
+def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000, edgeweight_multiplier = 0.02, node_size_multiplier = 5):
     
     fig = go.Figure()
     edgelist_df_selected = edgelist_df.loc[edgelist_df['Flow'] > cutoff_edgeweight]
     edgelist_df_selected['edgeweight'] = edgelist_df['Flow']/edgelist_df['Flow'].mean()*edgeweight_multiplier
-    node_df['weighted_stock'] = node_df['Stock']/node_df['Stock'].mean()
+    node_df['weighted_stock'] = node_df['Stock']/node_df['Stock'].mean() * node_size_multiplier
 
     if len(edgelist_df_selected) > 5000:
         edgelist_df_selected = edgelist_df_selected.head(5000)
@@ -37,9 +37,15 @@ def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000
                 line = dict(width = row['edgeweight'], color = edgecolor),
             ))
     fig.update_layout(
-        width = 700,
-        height= 600,
+        width = 800,
+        height= 800,
         showlegend = False,
+          margin=go.layout.Margin(
+                    l=0, #left margin
+                    r=0, #right margin
+                    b=0, #bottom margin
+                    t=0  #top margin
+    ),
         geo = dict(
             scope = 'world',
             projection_type = 'azimuthal equal area',

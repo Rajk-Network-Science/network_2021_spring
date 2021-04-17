@@ -72,7 +72,7 @@ app.layout = html.Div(children=[
                     html.Div('Egy adott év kiválasztásával megtekinthető az évben országok közötti áramlás', style = {'textAlign' : 'left'}),
                     
                     # Mendöl térképe
-                    dcc.Graph(id = 'terkep_viz'),
+                    html.Div(html.Div(dcc.Graph(id = 'terkep_viz'), style={'width':'100%'}),style={'width':'100%'}),
                     
                     dcc.Slider(
                         id = 'year_slider_1',
@@ -92,7 +92,7 @@ app.layout = html.Div(children=[
                     html.Div('Országok és év kiválasztásával megtekinthető az adott országok adott éves migrációs hálózata', style = {'textAlign' : 'left'}),
                   
                     # Gyenes gráfja
-                    html.Iframe(id = 'graf_viz', width = '100%', height = '75%'),
+                    html.Iframe(id = 'graf_viz', width = '100%', height = '85%'),
                     
                     dcc.Slider(
                         id = 'year_slider_2',
@@ -156,8 +156,8 @@ app.layout = html.Div(children=[
     Output('terkep_viz', 'figure'),
     Input('year_slider_1', 'value'))
 def update_map(year):
-    szurt_nodes = nodes[nodes.Year == year]
-    szurt_edges = edges[edges.Year == year]
+    szurt_nodes = nodes.loc[nodes.Year == year]
+    szurt_edges = edges.loc[edges.Year == year]
     fig = map_creation(edgelist_df = szurt_edges, node_df = szurt_nodes, edgeweight_multiplier = 0.02)
     fig.update_layout(transition_duration = 500)
     return fig
@@ -168,8 +168,8 @@ def update_map(year):
     Input('year_slider_2', 'value'),
     Input('orszag_dropdown_2', 'value'))
 def update_graf(year, orszagok):
-    szurt_nodes = nodes[(nodes.Year == year) & (nodes.Origin.isin(orszagok))]
-    szurt_edges = edges[(edges.Year == year) & (edges.Origin.isin(orszagok)) & (edges.Destination.isin(orszagok))]
+    szurt_nodes = nodes.loc[(nodes.Year == year) & (nodes.Origin.isin(orszagok))]
+    szurt_edges = edges.loc[(edges.Year == year) & (edges.Origin.isin(orszagok)) & (edges.Destination.isin(orszagok))]
     #generalt_nodes, generalt_edges = generate_data(node_features = szurt_nodes, edge_features = szurt_edges)
     #fig_html = graf_vizu(node_features = generalt_nodes, edge_features = generalt_edges).html
     fig = graf_vizu(node_features = szurt_nodes, edge_features = szurt_edges, edge_weight_multiplier = 5)
