@@ -1,28 +1,7 @@
-#!/usr/bin/env python
-# coding: utf-8
-
-# In[3]:
-
-
 import plotly.graph_objects as go
 import pandas as pd
 
-
-# In[5]:
-
-
-year = 1970
-df_coordinates = pd.read_csv('edge_list_final.csv')
-df_coordinates_selected = df_coordinates[df_coordinates['Year'] == year]
-
-df_nodes = pd.read_csv('attributes.csv')
-df_nodes_selected = df_nodes[df_nodes['Year'] == year]
-
-
-# In[7]:
-
-
-def map_creation(edgelist_df, node_df, edgecolor, cutoff_edgeweight, edgeweight_multiplier = 1):
+def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000, edgeweight_multiplier = 1):
     
     fig = go.Figure()
     edgelist_df_selected = edgelist_df[edgelist_df['Flow'] > cutoff_edgeweight]
@@ -56,7 +35,6 @@ def map_creation(edgelist_df, node_df, edgecolor, cutoff_edgeweight, edgeweight_
                 lat = [row['Origin_latitude'], row['Destination_latitude']],
                 mode = 'lines',
                 line = dict(width = row['edgeweight'], color = edgecolor),
-                #opacity = float(row['1960 [1960]']) / float(df_selected['1960 [1960]'].max()),
             ))
     fig.update_layout(
         title_text = 'Országok közötti migráció',
@@ -69,10 +47,3 @@ def map_creation(edgelist_df, node_df, edgecolor, cutoff_edgeweight, edgeweight_
             countrycolor = 'Black'
         ))
     return fig
-
-
-# In[8]:
-
-
-map_creation(df_coordinates_selected, df_nodes_selected, 'red', 1000, 0.02)
-
