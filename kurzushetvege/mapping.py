@@ -1,25 +1,25 @@
 import plotly.graph_objects as go
 import pandas as pd
 
-def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000, edgeweight_multiplier = 1):
+def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000, edgeweight_multiplier = 0.02):
     
     fig = go.Figure()
     edgelist_df_selected = edgelist_df[edgelist_df['Flow'] > cutoff_edgeweight]
     edgelist_df_selected['edgeweight'] = edgelist_df['Flow']/edgelist_df['Flow'].mean()*edgeweight_multiplier
-    
-    if len(edgelist_df_selected) > 1000:
-        print('A hálózat több, mint 1000 élt tartalmaz, a számítási kapacitások korlátossága miatt, csak a felső 1000 kerül ábrázolásra.')
-        edgelist_df_selected = edgelist_df_selected.head(1000)
+    node_df['weighted_stock'] = node_df['Stock']/node_df['Stock'].mean()
+
+    if len(edgelist_df_selected) > 5000:
+        edgelist_df_selected = edgelist_df_selected.head(5000)
         
     fig.add_trace(go.Scattergeo(
     locationmode = 'ISO-3',
     lon = node_df['Origin_longitude'],
     lat = node_df['Origin_latitude'],
     hoverinfo = 'text',
-    text = edgelist_df['Origin'],
+    text = node_df['Origin'],
     mode = 'markers',
     marker = dict(
-        size = 2,
+        size = node_df['weighted_stock'],
         color = 'rgb(255, 0, 0)',
         line = dict(
             width = 3,
@@ -37,7 +37,6 @@ def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000
                 line = dict(width = row['edgeweight'], color = edgecolor),
             ))
     fig.update_layout(
-        title_text = 'Országok közötti migráció',
         showlegend = True,
         geo = dict(
             scope = 'world',
