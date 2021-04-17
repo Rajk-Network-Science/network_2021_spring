@@ -39,7 +39,7 @@ import numpy as np
 import pandas as pd
 import scipy.integrate as integrate
 
-def backbone_extraction(G, alpha, weight, directed=True, print_info=True):
+def backbone_extraction(G, alpha, weight, directed=True, print_info=False):
 
 
     N = nx.DiGraph() if directed else nx.Graph()
@@ -96,8 +96,6 @@ def backbone_extraction(G, alpha, weight, directed=True, print_info=True):
 
 def grapth_to_edge_list(G, df, weight):
     edge_attr = nx.to_pandas_edgelist(G)
-    print(edge_attr.columns)
-    print(df.columns)
     edge_attr = edge_attr.merge(df, how="left", left_on=["source", "target", weight], right_on=["Origin", "Destination", weight])
     edge_attr = edge_attr[["Origin", "Destination", "Year", "Stock", "Flow", "Origin_latitude", "Origin_longitude", "Destination_latitude", "Destination_longitude"]]
     return edge_attr
@@ -117,7 +115,7 @@ def masterfilter(df, alpha, weight, year=None, origin=None, destination=None):
     )
 
     # making the backbone of the story
-    G = backbone_extraction(G, alpha, weight, directed=True, print_info=True)
+    G = backbone_extraction(G, alpha, weight, directed=True, print_info=False)
     edge_list = grapth_to_edge_list(G, df, weight)
     attributes = filter_attributes(
         df,
@@ -125,5 +123,8 @@ def masterfilter(df, alpha, weight, year=None, origin=None, destination=None):
         destination=destination,
         origin=edge_list.Origin.unique().tolist(),
     )
+   
+    if year:
+        edge_list=edge_list.loc[edge_list["Year"].isin(year)]
 
     return edge_list, attributes

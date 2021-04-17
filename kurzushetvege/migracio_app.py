@@ -24,23 +24,39 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 # FORMA
 colors = {
-    'bg' : '#a8dadc'
+    'bg' : 'white'
 }
 
 udvozlo_szoveg = '''
         De jó, hogy a dashboardunkra tévedtél! Próbáld ki, mielőtt _migráncsoznál_ egy jót!
         A grafikonokon a World Bank migrációs adatbázisának adatai láthatók.
-        Erről ezeket érdemes tudni:
-        - bla
-        - bliblu
-        - bluble
         
-        [Adatok leírása](https://datacatalog.worldbank.org/dataset/global-bilateral-migration-database)
+        Az app az 1960–2010 közötti, illetve 2013 és 2017 évi időszakok migrációs folyamatait
+        szemlélteti a World Bank kétoldalú migrációs mátrixai alapján. Így egy átfogó kép adódik az elmúlt 7 évtized kétoldalú globális migrációjáról. 
+
+        Az app 1. vizualizációja a kiválasztott időszakra mutatja a globális migráció alakulását a világtérképen.
+
+        Az app 2. vizualizációja adott évre a kiválasztott országok migrációs gráfját mutatja be,
+        ahol az ország csúcsok kövérségét a migráns állomány határozza meg, az országok közötti élek vastagságát pedig az állományváltozás.
+
+        Az app 3. vizualizációja a kiválasztott ország(ok) ki- vagy bevándorlók állományát, vagy ennek az
+        előző időszakhoz képesti változását mutatja a 10 legfontosabb befogadó- vagy célország körében.
         
         [Adatok forrása](https://www.worldbank.org/en/topic/migrationremittancesdiasporaissues/brief/migration-remittances-data)
         
-        Az alábbi gombok megnyomásával megnézhetsz néhány érdekes sztorit!
+        Az alábbi gomb megnyomásával megnézhetsz egy érdekes sztorit!
         '''
+        
+burdzs_szoveg = '''
+        A sivatagi területen épülő új Arab metropoliszek rengeteg
+        dél- és kelet-ázsiai munkást vonzottak az Öböl-országok térségébe.
+        Az olaj exportra épülő gazdaságok fejlődéséhez a magasan képzett-jellemzően
+        nyugati országokból érkező - munkások mellett az olcsó, szegényebb országokból
+        érkező munkaerőre is szükség volt. Remek példa erre a világ legmagasabb
+        építményének a Burj-Khalifa felhőkarcolónak története, mely felépítésén 2008-ban
+        7500 munkás dolgozott, a Guardian beszámolója alapján átlagosan kevesebb, mint *1200* forintos (£2.9) napi bérért.
+    '''        
+
 
 # DATA
 edges = pd.read_csv(os.path.join(DATAPATH, 'edge_list_final.csv'))
@@ -57,7 +73,7 @@ from Hobot.country_continent import country_dict
 # Mendöl térkép készítője
 from mapping import map_creation
 # Gyenes gráf és barchart készítője
-from gyenes_vizu import generate_data, graf_vizu, barchart
+from gyenes_vizu import generate_data, graf_vizu, barchart_migracio
 
 # LAYOUT
 
@@ -73,7 +89,7 @@ app.layout = html.Div(children=[
                     html.Div('Egy adott év kiválasztásával megtekinthető az évben országok közötti áramlás', style = {'textAlign' : 'left'}),
                     
                     # Mendöl térképe
-                    html.Div(html.Div(dcc.Graph(id = 'terkep_viz'), style={'width':'100%'}),style={'width':'100%'}),
+                    html.Div(html.Div(dcc.Graph(id = 'terkep_viz'), style={'width':'100%', 'height' : '400px'}),style={'width':'100%'}),
                     
                     dcc.Slider(
                         id = 'year_slider_1',
@@ -93,7 +109,7 @@ app.layout = html.Div(children=[
                     html.Div('Országok és év kiválasztásával megtekinthető az adott országok adott éves migrációs hálózata', style = {'textAlign' : 'left'}),
                   
                     # Gyenes gráfja
-                    html.Iframe(id = 'graf_viz', width = '100%', height = '85%', style={'background':"white"}),
+                    html.Iframe(id = 'graf_viz', width = '100%', height = '350px', style={'background':"white"}),
                     
                     dcc.Slider(
                         id = 'year_slider_2',
@@ -122,8 +138,10 @@ app.layout = html.Div(children=[
                 [
                     html.Div('Adott ország vizsgálata', style = {'textAlign' : 'left', 'fontSize' : 20, 'fontWeight' : 'bold'}),
                     html.Div('Egy adott ország esetében megtekinthetők a leggyakoribb küldő vagy fogadó országok', style = {'textAlign' : 'left'}),
-                    html.Img(src = 'https://www.amcharts.com/wp-content/uploads/2018/01/horizontal-bar-chart.png',
-                             height = 300, width = 384),
+                    dcc.Graph(id = 'barchart'),         
+                             
+                             
+                             
                     dcc.Dropdown(
                         id = 'orszag_dropdown_3', # this number means that this is the 3rd cell on the dashboard (not that this is the 3rd dropdown filter)
                         options = [{'label': i, 'value': i} for i in all_from],
@@ -132,19 +150,35 @@ app.layout = html.Div(children=[
                     dcc.RadioItems(
                         id = 'kibe_radio_3',
                         options = [{'label': 'Beáramlás', 'value' : 'be'},
-                                   {'label': 'Kiáramlás', 'value' : 'ki'}], # Itt még át kell írni a value-kat!
+                                   {'label': 'Kiáramlás', 'value' : 'ki'}],
                         value = 'be',
                         labelStyle = {'display': 'inline-block'}
                     ),
+                    dcc.Slider(
+                        id = 'year_slider_3',
+                        min = all_year.min(),
+                        max = all_year.max(),
+                        value = all_year.max(),
+                        marks = {str(year): str(year) for year in all_year},
+                        step = None),
                 ],
                 style = {'backgroundColor' : colors['bg']}, width = {'size' : 6}),
             
             dbc.Col(
                 [
-                    html.Div('Útmutató', style = {'textAlign' : 'left', 'fontSize' : 20, 'fontWeight' : 'bold'}),
-                    dcc.Markdown(udvozlo_szoveg),
+                    html.Div('Útmutató', id = 'utmutato_title', style = {'textAlign' : 'left', 'fontSize' : 20, 'fontWeight' : 'bold'}),
+                    dcc.Markdown(udvozlo_szoveg, id = 'leiras'),
+                    dcc.RadioItems(
+                        id = 'szoveg_valaszto',
+                        options = [{'label' : 'Alapállapot', 'value' : 'udv'},
+                                   {'label' : 'Burdzs Kalifa sztori', 'value' : 'burdzs'}],
+                        value = 'udv',
+                        labelStyle = {'display': 'inline-block'},
+                        style = {'margin-right' : '10px'}
+                    
+                    )
                 ],
-                style = {'backgroundColor' : colors['bg']}, width = {'size' : 6}),
+                )
                 
             ]) # Row 2 vége
     ]) # Layout vége
@@ -158,7 +192,7 @@ app.layout = html.Div(children=[
     Input('year_slider_1', 'value'))
 def update_map(year):
     szurt_edges, szurt_nodes = masterfilter(edges, 0.04, "Stock", year = [year])
-    fig = map_creation(edgelist_df = szurt_edges, node_df = szurt_nodes.reset_index(), edgeweight_multiplier = 0.02)
+    fig = map_creation(edgelist_df = szurt_edges, node_df = szurt_nodes.reset_index(), edgeweight_multiplier = 0.1, node_size_multiplier = 2)
 
     fig.update_layout(transition_duration = 500)
     return fig
@@ -170,12 +204,43 @@ def update_map(year):
     Input('orszag_dropdown_2', 'value'))
 def update_graf(year, orszagok):
     szurt_edges, szurt_nodes = masterfilter(edges, 1, "Stock", year = [year], origin = orszagok, destination = orszagok)
-    
-    #generalt_nodes, generalt_edges = generate_data(node_features = szurt_nodes, edge_features = szurt_edges)
-    #fig_html = graf_vizu(node_features = generalt_nodes, edge_features = generalt_edges).html
     fig = graf_vizu(node_features = szurt_nodes.reset_index(), edge_features = szurt_edges, edge_weight_multiplier = 5)
     fig.save_graph('gyenes_graf.html')
-    return fig.html # open('gyenes_graf.html', 'r').read()
+    return fig.html
+    
+# BARCHART (bal alsó)
+@app.callback(
+    Output('barchart', 'figure'),
+    Input('orszag_dropdown_3', 'value'),
+    Input('kibe_radio_3', 'value'),
+    Input('year_slider_3', 'value'))
+def update_barchart(orszag, kibe, year):
+    if kibe == 'be':
+        szurt_edges, szurt_nodes = masterfilter(edges, 1, "Stock", year = [year], destination = [orszag])
+        fig = barchart_migracio(orszag, szurt_edges, origin = False)
+    else:
+        szurt_edges, szurt_nodes = masterfilter(edges, 1, "Stock", year = [year], origin = [orszag])
+        fig = barchart_migracio(orszag, szurt_edges, origin = True)
+    
+    return fig
+    
+# BURDZS GOMB
+@app.callback(
+    Output('year_slider_1', 'value'),
+    Output('year_slider_2', 'value'),
+    Output('orszag_dropdown_2', 'value'),
+    Output('orszag_dropdown_3', 'value'),
+    Output('kibe_radio_3', 'value'),
+    Output('year_slider_3', 'value'),
+    Output('utmutato_title', 'children'),
+    Output('leiras', 'children'),
+    Input('szoveg_valaszto', 'value'))
+def update_filters(szovegopcio):
+    if szovegopcio == 'burdzs':
+        return 2010, 2010, ['United Arab Emirates', 'India', 'Bangladesh', 'Pakistan', 'Egypt, Arab Rep.', 'Philippines', 'Indonesia', 'Yemen, Rep.', 'Jordan', 'Sudan', 'Sri Lanka'], 'United Arab Emirates', 'be', 2010, 'Épül a Burdzs Kalifa', burdzs_szoveg
+    else:
+        return 2017, 2017, ['Germany', 'Greece', 'Austria', 'Hungary', 'Turkey'], 'Germany', 'be', 2017, 'Útmutató', udvozlo_szoveg
+        
 
 
 if __name__ == '__main__':

@@ -53,7 +53,7 @@ def graf_vizu(edge_features,node_features, logarithm=True, node_size_multiplier 
     edge features oszlopai: origin, destination, flow migration
     node features oszlopai: stock migration
     '''
-    mig_net = net.Network(height='650px', width='100%', bgcolor='white', font_color='black', notebook=True)
+    mig_net = net.Network(height='320px', width='100%', bgcolor='white', font_color='black', notebook=True)
     # set the physics layout of the network
     mig_net.barnes_hut()
     #Add nodes
@@ -72,76 +72,107 @@ def graf_vizu(edge_features,node_features, logarithm=True, node_size_multiplier 
             mig_net.add_edge(r["origin"], r["destination"], width=r["migration"])
     return mig_net
 
-def barchart_migracio(state, node_features, edge_features, stock=True, origin=True):
-    node,edge=generate_data(node_features,edge_features)
-    if stock:
-        if origin:
-            state_table = edge.loc[edge["origin"] == state].nlargest(
-                min(len(edge.loc[edge["origin"] == state]), 10),
-                "stock_migration",
-            )
-            fig = px.bar(
-                state_table,
-                x="destination",
-                y="stock_migration",
-                labels={
-                    "stock_migration": "Kivándorlás (stock)",
-                    "destination": "Befogadó országok",
-                },
-                height=400,
-                title=f"Top 10 befogadó ország. Anyaország: {state}",
-            )
+def barchart_migracio(state, edge_features, stock=True, origin=True):
 
-        else:
-            state_table = edge.loc[
-                edge["destination"] == state
-            ].nlargest(
-                min(len(edge.loc[edge["destination"] == state]), 10),
-                "stock_migration",
-            )
-            fig = px.bar(
-                state_table,
-                x="origin",
-                y="stock_migration",
-                labels={
-                    "stock_migration": "Bevándorlás (stock)",
-                    "origin": "Anyaországok",
-                },
-                height=400,
-                title=f"Top 10 anyaország. Befogadó ország: {state}",
-            )
+    if origin:
+        x_column = 'Destination'
+        labels = {
+                    "Stock": "Kivándorlás (stock)",
+                    "Destination": "Befogadó országok",
+                }
+        title = f"Top 10 befogadó ország. Anyaország: {state}"
     else:
-        if origin:
-            state_table = edge.loc[edge["origin"] == state].nlargest(
-                min(len(edge.loc[edge["origin"] == state]), 10),
-                "migration",
-            )
-            fig = px.bar(
-                state_table,
-                x="destination",
-                y="migration",
-                labels={
-                    "migration": "Kivándorlás (flow)",
-                    "destination": "Befogadó országok",
-                },
+        x_column = 'Origin'
+        labels = {
+                    "Stock": "Bevándorlás (stock)",
+                    "Origin": "Küldő országok",
+                }
+        title = f"Top 10 küldő ország. Befogadó ország: {state}"
+        
+    
+    
+    fig = px.bar(
+                edge_features.sort_values('Stock', ascending = False).head(10),
+                x=x_column,
+                y="Stock",
+                labels=labels,
                 height=400,
-                title=f"Top 10 befogadó ország. Anyaország: {state}",
+                title=title,
             )
-
-        else:
-            state_table = edge.loc[
-                edge["destination"] == state
-            ].nlargest(
-                min(len(edge.loc[edge["destination"] == state]), 10),
-                "migration",
-            )
-            fig = px.bar(
-                state_table,
-                x="origin",
-                y="migration",
-                labels={"migration": "Bevándorlás (flow)", "origin": "Anyaországok"},
-                height=400,
-                title=f"Top 10 anyaország. Befogadó ország: {state}",
-            )
-
+    
     return fig
+    
+    
+    
+ #  
+ #  if stock:
+ #      if origin:
+ #          state_table = edge.loc[edge["origin"] == state].nlargest(
+ #              min(len(edge.loc[edge["origin"] == state]), 10),
+ #              "stock_migration",
+ #          )
+ #          fig = px.bar(
+ #              state_table,
+ #              x="destination",
+ #              y="stock_migration",
+ #              labels={
+ #                  "stock_migration": "Kivándorlás (stock)",
+ #                  "destination": "Befogadó országok",
+ #              },
+ #              height=400,
+ #              title=f"Top 10 befogadó ország. Anyaország: {state}",
+ #          )
+ #
+ #      else:
+ #          state_table = edge.loc[
+ #              edge["destination"] == state
+ #          ].nlargest(
+ #              min(len(edge.loc[edge["destination"] == state]), 10),
+ #              "stock_migration",
+ #          )
+ #          fig = px.bar(
+ #              state_table,
+ #              x="origin",
+ #              y="stock_migration",
+ #              labels={
+ #                  "stock_migration": "Bevándorlás (stock)",
+ #                  "origin": "Anyaországok",
+ #              },
+ #              height=400,
+ #              title=f"Top 10 anyaország. Befogadó ország: {state}",
+ #          )
+ #  else:
+ #      if origin:
+ #          state_table = edge.loc[edge["origin"] == state].nlargest(
+ #              min(len(edge.loc[edge["origin"] == state]), 10),
+ #              "migration",
+ #          )
+ #          fig = px.bar(
+ #              state_table,
+ #              x="destination",
+ #              y="migration",
+ #              labels={
+ #                  "migration": "Kivándorlás (flow)",
+ #                  "destination": "Befogadó országok",
+ #              },
+ #              height=400,
+ #              title=f"Top 10 befogadó ország. Anyaország: {state}",
+ #          )
+ #
+ #      else:
+ #          state_table = edge.loc[
+ #              edge["destination"] == state
+ #          ].nlargest(
+ #              min(len(edge.loc[edge["destination"] == state]), 10),
+ #              "migration",
+ #          )
+ #          fig = px.bar(
+ #              state_table,
+ #              x="origin",
+ #              y="migration",
+ #              labels={"migration": "Bevándorlás (flow)", "origin": "Anyaországok"},
+ #              height=400,
+ #              title=f"Top 10 anyaország. Befogadó ország: {state}",
+ #          )
+ #
+ #  return fig
