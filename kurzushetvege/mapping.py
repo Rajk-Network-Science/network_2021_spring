@@ -37,12 +37,14 @@ def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000
                 line = dict(width = row['edgeweight'], color = edgecolor),
             ))
     fig.update_layout(
-        showlegend = True,
+        showlegend = False,
         geo = dict(
             scope = 'world',
             projection_type = 'azimuthal equal area',
             showcountries = True,
-            landcolor = 'rgb(218, 212, 131)',
+            landcolor = 'LightGreen',
+            showocean = True,
+            oceancolor = 'LightBlue',
             countrycolor = 'Black'
         ))
     return fig
