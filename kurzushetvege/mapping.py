@@ -38,7 +38,7 @@ def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000
             ))
     fig.update_layout(
         width = 800,
-        height= 800,
+        height= 400,
         showlegend = False,
           margin=go.layout.Margin(
                     l=0, #left margin
