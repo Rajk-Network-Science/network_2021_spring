@@ -10,7 +10,7 @@ import plotly.express as px
 # edge_features=pd.read_csv("edge_list_final.csv")
 
 
-def generate_data(node_features,edge_features):
+def generate_data(node_features,edge_features, node_size_multiplier=100, edge_weight_multiplier=1):
     '''
     data: node attributes
     data2: edge list
@@ -27,11 +27,11 @@ def generate_data(node_features,edge_features):
     node_features["display_nodesize"] = (
         node_features["stock_migration"]
         .pipe(lambda s: np.log(s.apply(lambda x: max(1,x))))
-        .pipe(lambda s: s / np.nanmean(s) * 100)
+        .pipe(lambda s: s / np.nanmean(s) * node_size_multiplier)
     )
     edge_features["display_edgesize"] = (
         edge_features["migration"]
-        .pipe(lambda s: s / np.nanmax(s))
+        .pipe(lambda s: s / np.nanmax(s) * edge_weight_multiplier)
     )
     
     edge_features = (
