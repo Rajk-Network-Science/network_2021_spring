@@ -48,7 +48,7 @@ def generate_data(node_features,edge_features, node_size_multiplier=100, edge_we
     )
     return node_features,edge_features
 
-def graf_vizu(edge_features,node_features, logarithm=True):
+def graf_vizu(edge_features,node_features, logarithm=True, node_size_multiplier = 100, edge_weight_multiplier = 1):
     '''
     edge features oszlopai: origin, destination, flow migration
     node features oszlopai: stock migration
@@ -57,7 +57,7 @@ def graf_vizu(edge_features,node_features, logarithm=True):
     # set the physics layout of the network
     mig_net.barnes_hut()
     #Add nodes
-    nodes,edges=generate_data(node_features,edge_features)
+    nodes,edges=generate_data(node_features,edge_features, node_size_multiplier, edge_weight_multiplier)
     
     for i, r in nodes.iterrows():
         if logarithm:
