@@ -1,0 +1,116 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" type="text/css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+
+<style type="text/css">
+
+        #mynetwork {
+            width: 100%;
+            height: 375px;
+            background-color: #222222;
+            border: 1px solid lightgray;
+            position: relative;
+            float: left;
+        }
+
+        
+
+        
+
+        
+</style>
+
+</head>
+
+<body>
+<div id = "mynetwork"></div>
+
+
+<script type="text/javascript">
+
+    // initialize global variables.
+    var edges;
+    var nodes;
+    var network; 
+    var container;
+    var options, data;
+
+    
+    // This method is responsible for drawing the graph, returns the drawn network
+    function drawGraph() {
+        var container = document.getElementById('mynetwork');
+        
+        
+
+        // parsing and collecting nodes and edges from the python
+        nodes = new vis.DataSet([{"font": {"color": "white"}, "id": "Austria", "label": "Austria", "shape": "dot", "size": 92.91834582814063, "title": "Austria"}, {"font": {"color": "white"}, "id": "Germany", "label": "Germany", "shape": "dot", "size": 108.03747009656823, "title": "Germany"}, {"font": {"color": "white"}, "id": "Greece", "label": "Greece", "shape": "dot", "size": 97.85403573164213, "title": "Greece"}, {"font": {"color": "white"}, "id": "Hungary", "label": "Hungary", "shape": "dot", "size": 95.34419517893801, "title": "Hungary"}, {"font": {"color": "white"}, "id": "Turkey", "label": "Turkey", "shape": "dot", "size": 105.84595316471099, "title": "Turkey"}]);
+        edges = new vis.DataSet([{"from": "Germany", "to": "Austria", "width": 0.6242720604578795}, {"from": "Greece", "to": "Austria", "width": 0.08148477439430984}, {"from": "Hungary", "to": "Austria", "width": 0.961502556123583}, {"from": "Turkey", "to": "Austria", "width": 0.043743054012002666}, {"from": "Greece", "to": "Germany", "width": 5.0}, {"from": "Hungary", "to": "Germany", "width": 3.2158257390531233}, {"from": "Turkey", "to": "Germany", "width": 0.11469215381195821}, {"from": "Turkey", "to": "Greece", "width": 1.1733274060902423}, {"from": "Turkey", "to": "Hungary", "width": 0.0008001778172927317}]);
+
+        // adding nodes and edges to the graph
+        data = {nodes: nodes, edges: edges};
+
+        var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": false,
+            "type": "continuous"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "barnesHut": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.3,
+            "damping": 0.09,
+            "gravitationalConstant": -80000,
+            "springConstant": 0.001,
+            "springLength": 250
+        },
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+        
+        
+
+        
+
+        network = new vis.Network(container, data, options);
+	 
+        
+
+
+        
+
+        return network;
+
+    }
+
+    drawGraph();
+
+</script>
+</body>
+</html>
