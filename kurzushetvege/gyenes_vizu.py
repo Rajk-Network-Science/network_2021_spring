@@ -53,7 +53,7 @@ def graf_vizu(edge_features,node_features, logarithm=True, node_size_multiplier 
     edge features oszlopai: origin, destination, flow migration
     node features oszlopai: stock migration
     '''
-    mig_net = net.Network(height='750px', width='100%', bgcolor='#222222', font_color='white', notebook=True)
+    mig_net = net.Network(height='375px', width='100%', bgcolor='#222222', font_color='white', notebook=True)
     # set the physics layout of the network
     mig_net.barnes_hut()
     #Add nodes

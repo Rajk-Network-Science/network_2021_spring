@@ -1,0 +1,116 @@
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis.css" type="text/css" />
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.16.1/vis-network.min.js"> </script>
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+
+<style type="text/css">
+
+        #mynetwork {
+            width: 100%;
+            height: 375px;
+            background-color: #222222;
+            border: 1px solid lightgray;
+            position: relative;
+            float: left;
+        }
+
+        
+
+        
+
+        
+</style>
+
+</head>
+
+<body>
+<div id = "mynetwork"></div>
+
+
+<script type="text/javascript">
+
+    // initialize global variables.
+    var edges;
+    var nodes;
+    var network; 
+    var container;
+    var options, data;
+
+    
+    // This method is responsible for drawing the graph, returns the drawn network
+    function drawGraph() {
+        var container = document.getElementById('mynetwork');
+        
+        
+
+        // parsing and collecting nodes and edges from the python
+        nodes = new vis.DataSet([{"font": {"color": "white"}, "id": "Austria", "label": "Austria", "shape": "dot", "size": 93.59329597920396, "title": "Austria"}, {"font": {"color": "white"}, "id": "Germany", "label": "Germany", "shape": "dot", "size": 106.98942097573736, "title": "Germany"}, {"font": {"color": "white"}, "id": "Greece", "label": "Greece", "shape": "dot", "size": 99.04093502150934, "title": "Greece"}, {"font": {"color": "white"}, "id": "Hungary", "label": "Hungary", "shape": "dot", "size": 92.19946099097284, "title": "Hungary"}, {"font": {"color": "white"}, "id": "Romania", "label": "Romania", "shape": "dot", "size": 102.81644226433313, "title": "Romania"}, {"font": {"color": "white"}, "id": "Turkey", "label": "Turkey", "shape": "dot", "size": 105.36044476824335, "title": "Turkey"}]);
+        edges = new vis.DataSet([{"from": "Germany", "to": "Austria", "width": -0.36999128624897853}, {"from": "Hungary", "to": "Austria", "width": 0.2592171620261051}, {"from": "Romania", "to": "Austria", "width": 0.6619967583040242}, {"from": "Turkey", "to": "Austria", "width": 0.8359591221234464}, {"from": "Greece", "to": "Germany", "width": -1.176043731291396}, {"from": "Hungary", "to": "Germany", "width": -0.5085692743206209}, {"from": "Romania", "to": "Germany", "width": 27.793401703922093}, {"from": "Turkey", "to": "Germany", "width": -5.019233460803923}, {"from": "Austria", "to": "Greece", "width": 0.03779871686630036}, {"from": "Romania", "to": "Greece", "width": 0.10778864864620817}, {"from": "Turkey", "to": "Greece", "width": -0.2138898545751708}, {"from": "Greece", "to": "Hungary", "width": -0.0786867519380195}, {"from": "Romania", "to": "Hungary", "width": -0.5382423054869542}, {"from": "Romania", "to": "Turkey", "width": -0.2730022709931419}]);
+
+        // adding nodes and edges to the graph
+        data = {nodes: nodes, edges: edges};
+
+        var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": false,
+            "type": "continuous"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "barnesHut": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.3,
+            "damping": 0.09,
+            "gravitationalConstant": -80000,
+            "springConstant": 0.001,
+            "springLength": 250
+        },
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+        
+        
+
+        
+
+        network = new vis.Network(container, data, options);
+	 
+        
+
+
+        
+
+        return network;
+
+    }
+
+    drawGraph();
+
+</script>
+</body>
+</html>
