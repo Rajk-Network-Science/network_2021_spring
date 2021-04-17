@@ -4,7 +4,7 @@ import pandas as pd
 def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000, edgeweight_multiplier = 0.02):
     
     fig = go.Figure()
-    edgelist_df_selected = edgelist_df[edgelist_df['Flow'] > cutoff_edgeweight]
+    edgelist_df_selected = edgelist_df.loc[edgelist_df['Flow'] > cutoff_edgeweight]
     edgelist_df_selected['edgeweight'] = edgelist_df['Flow']/edgelist_df['Flow'].mean()*edgeweight_multiplier
     node_df['weighted_stock'] = node_df['Stock']/node_df['Stock'].mean()
 

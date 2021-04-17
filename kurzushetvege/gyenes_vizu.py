@@ -10,7 +10,7 @@ import plotly.express as px
 # edge_features=pd.read_csv("edge_list_final.csv")
 
 
-def generate_data(node_features,edge_features, node_size_multiplier=100, edge_weight_multiplier=1):
+def generate_data(node_features,edge_features, node_size_multiplier=10, edge_weight_multiplier=1):
     '''
     data: node attributes
     data2: edge list
@@ -48,7 +48,7 @@ def generate_data(node_features,edge_features, node_size_multiplier=100, edge_we
     )
     return node_features,edge_features
 
-def graf_vizu(edge_features,node_features, logarithm=True, node_size_multiplier = 100, edge_weight_multiplier = 1):
+def graf_vizu(edge_features,node_features, logarithm=True, node_size_multiplier = 10, edge_weight_multiplier = 1):
     '''
     edge features oszlopai: origin, destination, flow migration
     node features oszlopai: stock migration

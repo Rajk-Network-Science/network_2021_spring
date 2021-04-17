@@ -12,8 +12,10 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import pandas as pd
 import pprint
+import os
 
-DATAPATH = 'C:/Users/HP/Documents/02_CODING/KURZUS_Network/DATA/Kurzushetvege/'
+
+DATAPATH = 'DATA/'
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
@@ -41,8 +43,8 @@ udvozlo_szoveg = '''
         '''
 
 # DATA
-edges = pd.read_csv(DATAPATH + 'edge_list_final.csv')
-nodes = pd.read_csv(DATAPATH + 'attributes.csv')
+edges = pd.read_csv(os.path.join(DATAPATH, 'edge_list_final.csv'))
+nodes = pd.read_csv(os.path.join(DATAPATH , 'attributes.csv'))
 all_from = edges.Origin.unique()
 all_to = edges.Destination.unique()
 all_year = edges.Year.unique()
