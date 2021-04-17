@@ -16,7 +16,7 @@ def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000
     lon = node_df['Origin_longitude'],
     lat = node_df['Origin_latitude'],
     hoverinfo = 'text',
-    text = df_coordinates['Origin'],
+    text = edgelist_df['Origin'],
     mode = 'markers',
     marker = dict(
         size = 2,
