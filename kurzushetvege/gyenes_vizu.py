@@ -10,7 +10,7 @@ import plotly.express as px
 # edge_features=pd.read_csv("edge_list_final.csv")
 
 
-def generate_data(node_features,edge_features, node_size_multiplier=100, edge_weight_multiplier=1):
+def generate_data(node_features,edge_features, node_size_multiplier, edge_weight_multiplier):
     '''
     data: node attributes
     data2: edge list
@@ -48,12 +48,12 @@ def generate_data(node_features,edge_features, node_size_multiplier=100, edge_we
     )
     return node_features,edge_features
 
-def graf_vizu(edge_features,node_features, logarithm=True, node_size_multiplier = 100, edge_weight_multiplier = 1):
+def graf_vizu(edge_features,node_features, logarithm=True, node_size_multiplier = 30, edge_weight_multiplier = 5):
     '''
     edge features oszlopai: origin, destination, flow migration
     node features oszlopai: stock migration
     '''
-    mig_net = net.Network(height='375px', width='100%', bgcolor='#222222', font_color='white', notebook=True)
+    mig_net = net.Network(height='650px', width='100%', bgcolor='white', font_color='black', notebook=True)
     # set the physics layout of the network
     mig_net.barnes_hut()
     #Add nodes
@@ -72,7 +72,7 @@ def graf_vizu(edge_features,node_features, logarithm=True, node_size_multiplier 
             mig_net.add_edge(r["origin"], r["destination"], width=r["migration"])
     return mig_net
 
-def barchart(state, stock=True, origin=True):
+def barchart_migracio(state, node_features, edge_features, stock=True, origin=True):
     node,edge=generate_data(node_features,edge_features)
     if stock:
         if origin:

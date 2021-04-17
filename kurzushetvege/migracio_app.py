@@ -12,8 +12,10 @@ import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output
 import pandas as pd
 import pprint
+import os
 
-DATAPATH = 'C:/Users/HP/Documents/02_CODING/KURZUS_Network/DATA/Kurzushetvege/'
+
+DATAPATH = 'DATA/'
 
 external_stylesheets = [dbc.themes.BOOTSTRAP]
 
@@ -41,8 +43,8 @@ udvozlo_szoveg = '''
         '''
 
 # DATA
-edges = pd.read_csv(DATAPATH + 'edge_list_final.csv')
-nodes = pd.read_csv(DATAPATH + 'attributes.csv')
+edges = pd.read_csv(os.path.join(DATAPATH, 'edge_list_final.csv'))
+nodes = pd.read_csv(os.path.join(DATAPATH , 'attributes.csv'))
 all_from = edges.Origin.unique()
 all_to = edges.Destination.unique()
 all_year = edges.Year.unique()
@@ -71,7 +73,7 @@ app.layout = html.Div(children=[
                     html.Div('Egy adott év kiválasztásával megtekinthető az évben országok közötti áramlás', style = {'textAlign' : 'left'}),
                     
                     # Mendöl térképe
-                    dcc.Graph(id = 'terkep_viz'),
+                    html.Div(html.Div(dcc.Graph(id = 'terkep_viz'), style={'width':'100%'}),style={'width':'100%'}),
                     
                     dcc.Slider(
                         id = 'year_slider_1',
@@ -91,7 +93,7 @@ app.layout = html.Div(children=[
                     html.Div('Országok és év kiválasztásával megtekinthető az adott országok adott éves migrációs hálózata', style = {'textAlign' : 'left'}),
                   
                     # Gyenes gráfja
-                    html.Iframe(id = 'graf_viz', width = '100%', height = '75%'),
+                    html.Iframe(id = 'graf_viz', width = '100%', height = '85%', style={'background':"white"}),
                     
                     dcc.Slider(
                         id = 'year_slider_2',
@@ -157,6 +159,7 @@ app.layout = html.Div(children=[
 def update_map(year):
     szurt_edges, szurt_nodes = masterfilter(edges, 0.04, "Stock", year = [year])
     fig = map_creation(edgelist_df = szurt_edges, node_df = szurt_nodes.reset_index(), edgeweight_multiplier = 0.02)
+
     fig.update_layout(transition_duration = 500)
     return fig
 
@@ -168,8 +171,6 @@ def update_map(year):
 def update_graf(year, orszagok):
     szurt_edges, szurt_nodes = masterfilter(edges, 1, "Stock", year = [year], origin = orszagok, destination = orszagok)
     
-    #szurt_nodes = nodes[(nodes.Year == year) & (nodes.Origin.isin(orszagok))]
-    #szurt_edges = edges[(edges.Year == year) & (edges.Origin.isin(orszagok)) & (edges.Destination.isin(orszagok))]
     #generalt_nodes, generalt_edges = generate_data(node_features = szurt_nodes, edge_features = szurt_edges)
     #fig_html = graf_vizu(node_features = generalt_nodes, edge_features = generalt_edges).html
     fig = graf_vizu(node_features = szurt_nodes.reset_index(), edge_features = szurt_edges, edge_weight_multiplier = 5)
