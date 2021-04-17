@@ -37,6 +37,8 @@ def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000
                 line = dict(width = row['edgeweight'], color = edgecolor),
             ))
     fig.update_layout(
+        width = 700,
+        height= 600,
         showlegend = False,
         geo = dict(
             scope = 'world',
