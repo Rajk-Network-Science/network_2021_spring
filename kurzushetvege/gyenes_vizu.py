@@ -5,14 +5,19 @@ import networkx as nx
 from pyvis import network as net
 from IPython.core.display import display, HTML
 
-def generate_data():
-    data=pd.read_csv("attributes.csv")
-    data.columns=['Origin','Year','Origin_latitude','Origin_longitude','stock_migration']
-    node_features=data.loc[data['Year'] == 2017]
+node_features=pd.read_csv("attributes.csv")
+edge_features=pd.read_csv("edge_list_final.csv")
+
+
+def generate_data(node_features,edge_features):
+    '''
+    data: node attributes
+    data2: edge list
+    '''
+    node_features.columns=['Origin','Year','Origin_latitude','Origin_longitude','stock_migration']
     node_features = node_features.set_index("Origin")
     node_features=node_features.drop(['Year','Origin_latitude','Origin_longitude'], axis=1)
-    data2=pd.read_csv("edge_list_final.csv")
-    edge_features=data2.loc[data2['Year'] == 2017]
+    
     edge_features=edge_features.drop(['Unnamed: 0','Year','Stock','Origin_latitude','Origin_longitude','Destination_latitude','Destination_longitude'], axis=1)
     edge_features.columns=['origin','destination','migration']
     
