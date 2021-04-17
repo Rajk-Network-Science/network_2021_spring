@@ -51,12 +51,13 @@ all_year = edges.Year.unique()
 
 # Függvények
 
+# Hobot adatelőkészítője
+from Hobot.dataprep import masterfilter
+from Hobot.country_continent import country_dict
 # Mendöl térkép készítője
 from mapping import map_creation
-# Gyenes gráf készítője
-from gyenes_vizu import generate_data, graf_vizu
-
-
+# Gyenes gráf és barchart készítője
+from gyenes_vizu import generate_data, graf_vizu, barchart
 
 # LAYOUT
 
@@ -156,9 +157,9 @@ app.layout = html.Div(children=[
     Output('terkep_viz', 'figure'),
     Input('year_slider_1', 'value'))
 def update_map(year):
-    szurt_nodes = nodes.loc[nodes.Year == year,:].copy(deep=True)
-    szurt_edges = edges.loc[edges.Year == year,:].copy(deep=True)
-    fig = map_creation(edgelist_df = szurt_edges, node_df = szurt_nodes, edgeweight_multiplier = 0.02)
+    szurt_edges, szurt_nodes = masterfilter(edges, 0.04, "Stock", year = [year])
+    fig = map_creation(edgelist_df = szurt_edges, node_df = szurt_nodes.reset_index(), edgeweight_multiplier = 0.02)
+
     fig.update_layout(transition_duration = 500)
     return fig
 
@@ -168,11 +169,11 @@ def update_map(year):
     Input('year_slider_2', 'value'),
     Input('orszag_dropdown_2', 'value'))
 def update_graf(year, orszagok):
-    szurt_nodes = nodes.loc[(nodes.Year == year) & (nodes.Origin.isin(orszagok)),:]
-    szurt_edges = edges.loc[(edges.Year == year) & (edges.Origin.isin(orszagok)) & (edges.Destination.isin(orszagok)),:]
+    szurt_edges, szurt_nodes = masterfilter(edges, 1, "Stock", year = [year], origin = orszagok, destination = orszagok)
+    
     #generalt_nodes, generalt_edges = generate_data(node_features = szurt_nodes, edge_features = szurt_edges)
     #fig_html = graf_vizu(node_features = generalt_nodes, edge_features = generalt_edges).html
-    fig = graf_vizu(node_features = szurt_nodes, edge_features = szurt_edges, edge_weight_multiplier = 5)
+    fig = graf_vizu(node_features = szurt_nodes.reset_index(), edge_features = szurt_edges, edge_weight_multiplier = 5)
     fig.save_graph('gyenes_graf.html')
     return fig.html # open('gyenes_graf.html', 'r').read()
 

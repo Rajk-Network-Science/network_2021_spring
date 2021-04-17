@@ -21,7 +21,7 @@ def generate_data(node_features,edge_features, node_size_multiplier, edge_weight
     node_features=node_features.drop(['Year','Origin_latitude','Origin_longitude'], axis=1)
     
     #edge_features=edge_features.loc[edge_features['Year'] == 2017]
-    edge_features=edge_features.drop(['Unnamed: 0','Year','Origin_latitude','Origin_longitude','Destination_latitude','Destination_longitude'], axis=1)
+    edge_features=edge_features.drop(['Year','Origin_latitude','Origin_longitude','Destination_latitude','Destination_longitude'], axis=1)
     edge_features.columns=['origin','destination','stock_migration','migration']
     
     node_features["display_nodesize"] = (
