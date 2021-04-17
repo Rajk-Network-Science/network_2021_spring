@@ -42,7 +42,9 @@ def map_creation(edgelist_df, node_df, edgecolor="red", cutoff_edgeweight = 1000
             scope = 'world',
             projection_type = 'azimuthal equal area',
             showcountries = True,
-            landcolor = 'rgb(218, 212, 131)',
+            landcolor = 'LightGreen',
+            showocean = True,
+            oceancolor = 'LightBlue',
             countrycolor = 'Black'
         ))
     return fig
