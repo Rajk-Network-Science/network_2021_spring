@@ -5,8 +5,8 @@ import networkx as nx
 from pyvis import network as net
 from IPython.core.display import display, HTML
 
-node_features=pd.read_csv("attributes.csv")
-edge_features=pd.read_csv("edge_list_final.csv")
+# node_features=pd.read_csv("attributes.csv")
+# edge_features=pd.read_csv("edge_list_final.csv")
 
 
 def generate_data(node_features,edge_features):
