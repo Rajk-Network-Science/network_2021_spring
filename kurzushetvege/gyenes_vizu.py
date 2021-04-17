@@ -5,17 +5,42 @@ import networkx as nx
 from pyvis import network as net
 from IPython.core.display import display, HTML
 
-list_of_countries=["a","b","c","d"]
-node_sizes=[20,5,132,18]
-node_features=pd.DataFrame(index=list_of_countries,data=node_sizes)
-edges_index=list(itertools.combinations(list_of_countries, 2))
-edge_values=np.random.rand(len(edges_index),1)
-edge_features=pd.DataFrame(index=pd.MultiIndex.from_tuples(edges_index, names=('origin', 'destination')), data=edge_values)
-edge_features.columns=["migration"]
-node_features.columns=["stock_migration"]
-edge_features=edge_features.reset_index()
+def generate_data():
+    data=pd.read_csv("attributes.csv")
+    data.columns=['Origin','Year','Origin_latitude','Origin_longitude','stock_migration']
+    node_features=data.loc[data['Year'] == 2017]
+    node_features = node_features.set_index("Origin")
+    node_features=node_features.drop(['Year','Origin_latitude','Origin_longitude'], axis=1)
+    data2=pd.read_csv("edge_list_final.csv")
+    edge_features=data2.loc[data2['Year'] == 2017]
+    edge_features=edge_features.drop(['Unnamed: 0','Year','Stock','Origin_latitude','Origin_longitude','Destination_latitude','Destination_longitude'], axis=1)
+    edge_features.columns=['origin','destination','migration']
+    
+    node_features["display_nodesize"] = (
+        node_features["stock_migration"]
+        .pipe(lambda s: np.log(s.apply(lambda x: max(1,x))))
+        .pipe(lambda s: s / np.nanmean(s) * 100)
+    )
+    edge_features["display_edgesize"] = (
+        edge_features["migration"]
+        .pipe(lambda s: s / np.nanmean(s))
+    )
+    
+    edge_features = (
+        node_features.reset_index()[["Origin"]]
+        .pipe(
+            lambda df: edge_features.merge(
+                df, left_on="origin", right_on="Origin", how="right"
+            )
+            .drop("Origin", axis=1)
+            .merge(df, left_on="destination", right_on="Origin", how="right")
+        )
+        .dropna(how="any")
+        .drop(["Origin"], axis=1)
+    )
+    return node_features,edge_features
 
-def vizu(edge_features,node_features):
+def graf_vizu(edge_features,node_features, logarithm=True):
     '''
     edge features oszlopai: origin, destination, flow migration
     node features oszlopai: stock migration
@@ -23,13 +48,16 @@ def vizu(edge_features,node_features):
     mig_net = net.Network(height='750px', width='100%', bgcolor='#222222', font_color='white', notebook=True)
     # set the physics layout of the network
     mig_net.barnes_hut()
-    edge_data = zip(edge_features["origin"], edge_features["destination"], edge_features["migration"])
-    for e in edge_data:
-        src = e[0]
-        dst = e[1]
-        w = e[2]
-    
-        mig_net.add_node(src, src, title=src, size=int(node_features.loc[src,"stock_migration"]))
-        mig_net.add_node(dst, dst, title=dst, size=int(node_features.loc[dst,"stock_migration"]))
-        mig_net.add_edge(src, dst, value=w)
+    #Add nodes
+    for i, r in node_features.iterrows():
+        if logarithm:
+            mig_net.add_node(i, i, title=i, size=r["display_nodesize"])
+        else:
+            mig_net.add_node(i, i, title=i, size=r["stock_migration"])
+    #Add edges
+    for i, r in edge_features.iterrows():
+        if logarithm:
+            mig_net.add_edge(r["origin"], r["destination"], width=r["display_edgesize"])
+        else:
+            mig_net.add_edge(r["origin"], r["destination"], width=r["migration"])
     return mig_net
